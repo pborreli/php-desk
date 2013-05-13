@@ -105,4 +105,67 @@ class ClientTest extends UnitTestCase
 
         $this->assertSame($client, $client->addDefaultHeader('baz', 'qux'));
     }
+
+    /**
+     * @covers Desk\Client::getCommandForDeskClass
+     */
+    public function testGetCommandForDeskClass()
+    {
+        $operation = \Mockery::mock('Guzzle\\Service\\Description\\Operation')
+            ->shouldReceive('getName')
+                ->andReturn('operationName')
+            ->getMock();
+
+        $client = $this->mock(array('getOperationForDeskClass', 'getCommand'))
+            ->shouldReceive('getOperationForDeskClass')
+                ->with('myClass')
+                ->andReturn($operation)
+            ->shouldReceive('getCommand')
+                ->with('operationName')
+                ->andReturn('returned command')
+            ->getMock();
+
+        $result = $client->getCommandForDeskClass('myClass');
+        $this->assertSame('returned command', $result);
+    }
+
+    /**
+     * @covers Desk\Client::getOperationForDeskClass
+     */
+    public function testGetOperationForDeskClass()
+    {
+        $client = $this->mock('getDescription');
+
+        $operation1 = \Mockery::mock('Guzzle\\Service\\Description\\Operation')
+            ->shouldReceive('getData')
+                ->with('class')
+                ->andReturn(null)
+            ->getMock();
+
+        $operation2 = \Mockery::mock('Guzzle\\Service\\Description\\Operation')
+            ->shouldReceive('getData')
+                ->with('class')
+                ->andReturn('foo')
+            ->getMock();
+
+        $client->shouldReceive('getDescription->getOperations')
+            ->andReturn(array($operation1, $operation2));
+
+        $result = $client->getOperationForDeskClass('foo');
+        $this->assertSame($operation2, $result);
+    }
+
+    /**
+     * @covers Desk\Client::getOperationForDeskClass
+     * @expectedException Desk\Exception\InvalidArgumentException
+     */
+    public function testGetOperationForDeskClassInvalid()
+    {
+        $client = $this->mock(array('getDescription', 'getCommand'));
+
+        $client->shouldReceive('getDescription->getOperations')
+            ->andReturn(array());
+
+        $client->getOperationForDeskClass('bar');
+    }
 }

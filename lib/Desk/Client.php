@@ -4,6 +4,7 @@ namespace Desk;
 
 use Desk\Client\FactoryInterface;
 use Desk\Client\Factory;
+use Desk\Exception\InvalidArgumentException;
 
 class Client extends \Guzzle\Service\Client
 {
@@ -91,5 +92,44 @@ class Client extends \Guzzle\Service\Client
         $this->setDefaultHeaders($headers);
 
         return $this;
+    }
+
+    /**
+     * Gets a command based on the Desk.com API's "class"
+     *
+     * @param string $className The "class" according to Desk
+     *
+     * @return Desk\Command\AbstractCommand
+     *
+     * @throws Desk\Exception\InvalidArgumentException If $className is
+     * not a known Desk class
+     */
+    public function getCommandForDeskClass($className)
+    {
+        $operation = $this->getOperationForDeskClass($className);
+        return $this->getCommand($operation->getName());
+    }
+
+    /**
+     * Retrieves an operation for a particular Desk class
+     *
+     * @param string $className The "class" according to Desk
+     *
+     * @return Desk\Command\AbstractCommand
+     *
+     * @throws Desk\Exception\InvalidArgumentException If $className is
+     * not a known Desk class
+     */
+    public function getOperationForDeskClass($className)
+    {
+        foreach ($this->getDescription()->getOperations() as $operation) {
+            if ($operation->getData('class') == $className) {
+                return $operation;
+            }
+        }
+
+        throw new InvalidArgumentException(
+            "Unknown Desk class '$className'"
+        );
     }
 }
