@@ -3,6 +3,7 @@
 namespace Desk\Test\Helper;
 
 use Desk\Client as DeskClient;
+use Desk\Model\AbstractModel;
 use Guzzle\Service\Client;
 use Guzzle\Tests\GuzzleTestCase;
 use ReflectionClass;
@@ -26,6 +27,7 @@ abstract class TestCase extends GuzzleTestCase
     private function clearInstances()
     {
         DeskClient::setFactory();
+        AbstractModel::setFactory();
     }
 
     /**

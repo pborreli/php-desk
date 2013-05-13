@@ -69,6 +69,39 @@ class ClientTest extends UnitTestCase
     }
 
     /**
+     * @covers Desk\Client::setDescription
+     */
+    public function testSetDescription()
+    {
+        $client = $this->mock();
+
+        $operations = array(
+            'operation1' => \Mockery::mock('Guzzle\\Service\\Description\\Operation')
+                ->shouldReceive('setName')
+                    ->with('operation1')
+                    ->atLeast()->once()
+                ->getMock(),
+            'operation2' => \Mockery::mock('Guzzle\\Service\\Description\\Operation')
+                ->shouldReceive('setName')
+                    ->with('operation2')
+                    ->atLeast()->once()
+                ->getMock(),
+        );
+
+        $description = \Mockery::mock('Guzzle\\Service\\Description\\ServiceDescription')
+            ->shouldReceive('getOperations')
+                ->atLeast()->once()
+                ->andReturn($operations)
+            ->shouldReceive('getBaseUrl')
+                ->andReturn('http://mock.localhost/')
+            ->getMock();
+
+        $client->setDescription($description);
+
+        $this->assertSame($description, $client->getDescription());
+    }
+
+    /**
      * @covers Desk\Client::setAuth
      */
     public function testSetAuth()

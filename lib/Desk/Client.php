@@ -5,6 +5,7 @@ namespace Desk;
 use Desk\Client\FactoryInterface;
 use Desk\Client\Factory;
 use Desk\Exception\InvalidArgumentException;
+use Guzzle\Service\Description\ServiceDescriptionInterface;
 
 class Client extends \Guzzle\Service\Client
 {
@@ -61,6 +62,18 @@ class Client extends \Guzzle\Service\Client
         return self::getFactory()->factory($config);
     }
 
+
+    /**
+     * {@inheritdoc}
+     */
+    public function setDescription(ServiceDescriptionInterface $service)
+    {
+        foreach ($service->getOperations() as $name => $operation) {
+            $operation->setName($name);
+        }
+
+        return parent::setDescription($service);
+    }
 
     /**
      * Sets basic authentication details on all subsequent requests
